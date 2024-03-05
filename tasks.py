@@ -22,7 +22,7 @@ def get_weather(city):
     querystring = {"location":city,"format":"json","u":"f"}
 
     headers = {
-        "X-RapidAPI-Key": "Replace this Text with your RapidAPI-Key if you want to use my project",
+        "X-RapidAPI-Key": "Replace this Text with your RapidAPI-Key if you want to use my project.",
         "X-RapidAPI-Host": "yahoo-weather5.p.rapidapi.com"
     }
 
