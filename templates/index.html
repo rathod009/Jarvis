@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Chat Window</title>
+    <style>
+        body {
+            margin-left: 10;
+            margin-right: 10;
+            padding: 0;
+            background-image: url('static/1.jpg'); /* Specify the path to your background image */
+            background-size: 95%; /* Cover the entire viewport */
+            background-repeat: no-repeat; /* No repeating of the image */
+            background-position: center; /* Center the background image */
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-container {
+            height: 550px;
+            max-width: 825px; /* Adjust the width as needed */
+            border: 2px solid #000000;
+            overflow-y: scroll;
+            padding: 10px;
+            background-size: cover; /* Cover the entire container */
+            margin: 30px auto;
+            border-radius: 5px;
+        }
+
+        .input-wrapper{
+            display: flex;
+          max-width: 500px;
+          margin: 0px auto;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            opacity: 80%;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 75%; /* Ensure messages have the same width as input */
+            word-wrap: break-word; /* Break long words to the next line */
+        }
+        
+        .system-message {
+            background-color: #000000; /* Light green background for system messages */
+            color: #11ff00; /* Black text color */
+            margin-left: 0; /* Align system messages to the left */
+            margin-right: auto; /* Align system messages to the left */
+        }
+
+        .user-message {
+            background-color: #000000; /* WhatsApp-like blue background for user messages */
+            color: #00fff7; /* White text color */
+            margin-left: auto; /* Align user messages to the right */
+            margin-right: 0; /* Align user messages to the right */
+        }
+
+        #message-input {
+            width: 500px;
+            max-width: 65%; /* Adjust the width as needed */
+            padding: 10px;
+            display: block;
+            margin: 0 auto; /* This will center the button */
+            border: 1px solid;
+            border-radius: 10px; /* Rounded input field */
+            font-size: 16px;
+            background-color: #F4F4F4; /* Light gray background */
+            color: #000; /* Black text color */
+            opacity: 90%;
+            outline: none; /* Remove default input outline */
+            padding-left: 20px; /* Add some padding to the left */
+            margin-left: 100px auto; /* Align input to the right */
+            margin-right: 0px auto; /* Align input to the right */
+        }
+
+        button {
+            padding: 15px;
+            margin: 0px auto;
+            height: 48px;
+            border: 1px solid;
+            border-radius: 25px; /* Rounded button */
+            background-color: #0051ff; /* hilighter green color button*/
+            color: #ffffff; /* black text color */
+            font-size: 16px;
+            cursor: pointer;
+            
+        }
+
+        button.center {
+            display: block;
+            margin: 0 auto; /* This will center the button */
+        }
+
+
+        button:hover {
+            background-color: #ff007b; /* Darker shade of blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <!-- Messages will be displayed here -->
+        <!-- Add loader inside the chat container -->
+        <div id="loader" style="display: none; position: absolute; top: 78%; left: 50%; transform: translate(-50%, -50%);">
+            <i class="fa-solid fa-spinner fa-spin-pulse fa-2xl" style="color: #1100ff; font-size: 70px;"></i>
+        </div>
+    </div>
+    <div class="input-wrapper">
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button class="center" onclick="startListening()">
+            <i class="fa-solid fa-microphone fa-fade fa-lg" style="color: #ffffff;"></i>
+        </button>
+        <button class="center" onclick="sendMessage()">
+            <i class="fa-regular fa-paper-plane fa-lg" style="color: #ffffff;"></i>
+        </button>
+        <!-- <button onclick="sendMessage()">Send</button> -->
+        <!-- <button class="center" onclick="startListening()">Start Listening</button> -->
+    </div>
+
+    <script>
+        // JavaScript for sending messages and displaying responses
+        function sendMessage() {
+            var message = document.getElementById("message-input").value;
+            displayMessage("You: " + message, 'user');
+            document.getElementById("message-input").value = "";
+    
+            // Show loader
+            document.getElementById("loader").style.display = "block";
+    
+            // Send the message to the server for processing
+            fetch("/process_message", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var response = data.response;
+                formatAndDisplayResponse(response); // New function to handle formatting
+                // Hide loader when response received
+                document.getElementById("loader").style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Hide loader in case of error
+                document.getElementById("loader").style.display = "none";
+            });
+        }
+    
+        // Function to properly format and display the response from Jarvis
+        function formatAndDisplayResponse(response) {
+            // Add proper headings, subheadings, line breaks, and paragraph spacing
+            var formattedResponse = response.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>'); // Double asterisks with content to heading
+            formattedResponse = formattedResponse.replace(/\* (.*?):/g, '<h4>$1:</h4>'); // Subtopics to subheading
+            formattedResponse = formattedResponse.replace(/\s*<h3>\s*/g, '<h3>'); // Remove extra space after heading
+            formattedResponse = formattedResponse.replace(/\s*<h4>\s*/g, '<h4>'); // Remove extra space after subheading
+            formattedResponse = formattedResponse.replace(/\n(?!\n)/g, '<br>'); // Add line breaks
+            formattedResponse = formattedResponse.replace(/\n{2,}/g, '</p><p>'); // Convert consecutive line breaks to paragraph breaks
+            formattedResponse = formattedResponse.trim(); // Trim any leading/trailing spaces
+        
+            // Display the formatted response as a system message
+            displayMessage(formattedResponse, 'system');
+        }
+        
+        function displayMessage(message, type) {
+            var chatContainer = document.getElementById("chat-container");
+            var messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            if (type === 'system') {
+                messageElement.classList.add("system-message");
+            } else {
+                messageElement.classList.add("user-message");
+            }
+            messageElement.innerHTML = message; // Set the innerHTML property to display formatted HTML content
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+        }
+    
+        // Function to start listening through microphone
+        function startListening() {
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+    
+            recognition.onresult = function(event) {
+                var transcript = event.results[0][0].transcript;
+                document.getElementById("message-input").value = transcript;
+            }
+    
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+            }
+    
+            recognition.start();
+        }
+    
+        window.onload = function() {
+            displayInitialMessage();
+        };
+    
+        function displayInitialMessage() {
+            displayMessage("Jarvis: Hello Sir!", 'system');
+        }
+    </script>
+</body>
+</html>
