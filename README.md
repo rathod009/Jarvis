@@ -1,7 +1,7 @@
 # Jarvis
-A Personal Chatbot Assistant(JARVIS) created using Gemini Pro.
+A Personal Chatbot Assistant (JARVIS) was created using Gemini Pro.
 
 *NOTE:*
-To Run the Following Project you should have 2 different API keys which i used:
+To run the following project, you should have two different personal API keys, which I used:
 1. Google Gemini Pro API Key
 2. RapidAPI-Key
